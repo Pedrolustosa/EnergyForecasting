@@ -1,0 +1,452 @@
+/* Custom styles for Energy Prediction App */
+
+/* Navbar styles */
+.navbar-custom {
+  background: #007bff !important;
+  border-bottom: 1px solid rgba(0, 123, 255, 0.3);
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 20px rgba(0, 123, 255, 0.2);
+}
+
+.navbar-custom:hover {
+  background: #0056b3 !important;
+  box-shadow: 0 4px 25px rgba(0, 123, 255, 0.3);
+}
+
+.navbar-brand {
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  transform: translateY(-2px);
+}
+
+.navbar-brand img {
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover img {
+  transform: rotate(10deg) scale(1.1);
+}
+
+/* Navbar toggle button */
+.navbar-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Nav items styling */
+.navbar-nav .nav-item {
+  transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-item:hover {
+  transform: translateY(-1px);
+}
+
+/* Dropdown styling */
+.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-menu {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  border-radius: 0;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(45deg, #f1f3f4, #e8eaed);
+  transform: translateX(3px);
+  color: #74b9ff;
+}
+
+.dropdown-item i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Status indicators */
+.text-white-50 {
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.text-white-50:hover {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+/* Navbar brand text styling */
+.navbar-brand div .small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* Global styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Card styles */
+.card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.6s ease-out;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Custom button styles */
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 12px 24px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.btn-primary {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+  color: white;
+}
+
+.btn-success {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #1e7e34;
+  border-color: #1e7e34;
+  color: white;
+}
+
+.btn-warning {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  border-color: #d39e00;
+  color: #212529;
+}
+
+.btn-danger {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  border-color: #bd2130;
+  color: white;
+}
+
+.btn-info {
+  background: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #138496;
+  border-color: #117a8b;
+  color: white;
+}
+
+/* Form controls */
+.form-control {
+  border-radius: 12px;
+  border: 2px solid #ced4da;
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  background: rgba(255, 255, 255, 1);
+}
+
+.form-control[type="file"] {
+  border-style: dashed;
+  background: rgba(248, 249, 250, 0.8);
+  border-color: #6c757d;
+}
+
+.form-select {
+  border-radius: 12px;
+  border: 2px solid #ced4da;
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* File input styling */
+.form-control[type="file"] {
+  padding: 15px;
+  background: #f8f9fa;
+  border-style: dashed !important;
+  text-align: center;
+}
+
+.form-control[type="file"]:hover {
+  background: rgba(248, 249, 250, 1);
+  border-color: #007bff !important;
+}
+
+/* Badge styling */
+.badge {
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Table styling */
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background: #f8f9fa;
+  border: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: #495057;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+  transform: scale(1.005);
+}
+
+/* Chart container */
+.chart-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+/* Loading animation */
+.spinner-border {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2.5rem !important;
+  }
+  
+  .card-body {
+    padding: 1.5rem !important;
+  }
+  
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+  
+  /* Navbar responsive */
+  .navbar-custom {
+    padding: 0.75rem 0;
+  }
+  
+  .navbar-brand span {
+    font-size: 1.1rem !important;
+  }
+  
+  .navbar-brand img {
+    height: 32px !important;
+  }
+  
+  .d-flex.align-items-center .badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem !important;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #007bff;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0056b3;
+}
+
+/* Animation for cards appearing */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Toastr customization with Bootstrap colors */
+.toast-success {
+  background-color: #28a745 !important;
+}
+
+.toast-error {
+  background-color: #dc3545 !important;
+}
+
+.toast-info {
+  background-color: #17a2b8 !important;
+}
+
+.toast-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.toast-success .toast-progress,
+.toast-error .toast-progress,
+.toast-info .toast-progress {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.toast-warning .toast-progress {
+  background-color: rgba(33, 37, 41, 0.7) !important;
+}
+
+/* Toast container */
+#toast-container {
+  z-index: 9999;
+}
+
+#toast-container > div {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+}
+
+#toast-container .toast-close-button {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: bold;
+  text-shadow: none;
+  opacity: 0.8;
+}
+
+#toast-container .toast-close-button:hover {
+  opacity: 1;
+}
+
+#toast-container.toast-warning .toast-close-button {
+  color: rgba(33, 37, 41, 0.8);
+}
