@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Container, Button, Form, Spinner, Row, Col, Table, Card, Badge } from "react-bootstrap";
 import { Chart as ChartJS } from "react-chartjs-2";
@@ -12,7 +12,6 @@ import "./App.css";
 
 Chart.register(...registerables);
 
-// Configure toastr
 toastr.options = {
   closeButton: true,
   debug: false,
@@ -102,7 +101,6 @@ function App() {
     setLoading(false);
   };
 
-  // Formatar data para o padrão brasileiro
   const formatDateToBR = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -112,11 +110,9 @@ function App() {
     });
   };
 
-  // Filtrar dados baseado no intervalo de datas
   const getFilteredPredictions = () => {
     let filtered = [...predictions];
 
-    // Filtrar por data inicial se especificada
     if (startDate) {
       const startDateObj = new Date(startDate);
       filtered = filtered.filter(p => {
@@ -125,10 +121,8 @@ function App() {
       });
     }
 
-    // Filtrar por data final se especificada
     if (endDate) {
       const endDateObj = new Date(endDate);
-      // Adicionar 1 dia para incluir toda a data final (até 23:59:59)
       endDateObj.setDate(endDateObj.getDate() + 1);
       filtered = filtered.filter(p => {
         const predDate = new Date(p.date);
@@ -141,29 +135,21 @@ function App() {
 
 
 
-  // Gerar dados simulados para demonstração (irradiação e energia injetada)
   const generateSimulatedData = (predictions: Prediction[]) => {
     return predictions.map((p, index) => ({
       ...p,
-      // Simular irradiação baseada na energia gerada (correlação aproximada)
       irradiation: p.real ? Math.max(200, p.real * 15 + Math.random() * 100 - 50) : Math.random() * 400 + 200,
-      // Simular energia injetada (geralmente menor que a gerada)
       injected: p.real ? Math.max(0, p.real * 0.7 + Math.random() * p.real * 0.2 - p.real * 0.1) : p.predicted * 0.7
     }));
   };
 
-  // Dados para o gráfico (todos os dados filtrados)
   const filteredPredictions = getFilteredPredictions();
   const enrichedPredictionsChart = generateSimulatedData(filteredPredictions);
-
-  // Dados para a tabela (todos os dados filtrados)
   const enrichedPredictionsTable = generateSimulatedData(filteredPredictions);
 
-  // Configuração do gráfico misto
   const mixedChartData = {
     labels: enrichedPredictionsChart.map((p) => formatDateToBR(p.date)),
     datasets: [
-      // Barras - Energia Prevista
       {
         type: 'bar' as const,
         label: "Energia Prevista (kWh)",
@@ -173,7 +159,6 @@ function App() {
         borderWidth: 1,
         yAxisID: 'y',
       },
-      // Barras - Energia Gerada Real
       {
         type: 'bar' as const,
         label: "Energia Gerada (kWh)",
@@ -183,7 +168,6 @@ function App() {
         borderWidth: 1,
         yAxisID: 'y',
       },
-      // Barras - Energia Injetada
       {
         type: 'bar' as const,
         label: "Energia Injetada (kWh)",
@@ -193,7 +177,6 @@ function App() {
         borderWidth: 1,
         yAxisID: 'y',
       },
-      // Linha - Irradiação
       {
         type: 'line' as const,
         label: "Irradiação (Wh/m2)",
@@ -211,7 +194,6 @@ function App() {
     ],
   };
 
-  // Opções do gráfico misto
   const mixedChartOptions = {
     responsive: true,
     interaction: {
@@ -284,14 +266,13 @@ function App() {
 
   return (
     <div className="min-vh-100 bg-light">
-      {/* Academic Header */}
       <div className="bg-white border-bottom shadow-sm">
         <Container>
           <div className="py-4">
             <div className="row align-items-center">
               <div className="col">
-                <h1 className="h3 mb-1 text-dark fw-bold">
-                  <i className="bi bi-graph-up text-primary me-2"></i>
+                <h1 className="h3 mb-1 text-dark fw-bold d-flex align-items-center">
+                  <img src="/logo_sun.png" alt="Logo" className="me-2" style={{width: '32px', height: '32px'}} />
                   Sistema de Previsão Energética
                 </h1>
                 <p className="text-muted mb-0 small">
@@ -315,9 +296,7 @@ function App() {
         </Container>
       </div>
 
-      {/* Main Content */}
       <Container className="py-4">
-        {/* Academic Introduction */}
         <div className="mb-4">
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4">
@@ -349,7 +328,6 @@ function App() {
           </Card>
         </div>
 
-        {/* Main Controls Card */}
         <Card className="shadow-lg border-0 mb-4">
           <Card.Header className="bg-white border-0 py-4">
             <h4 className="mb-0 text-primary d-flex align-items-center">
@@ -441,7 +419,6 @@ function App() {
               </Col>
             </Row>
 
-            {/* Status Indicators */}
             <Row className="mt-4">
               <Col>
                 <div className="d-flex gap-3 flex-wrap">
@@ -461,7 +438,6 @@ function App() {
               </Col>
             </Row>
 
-            {/* Filtros do Gráfico */}
             {predictions.length > 0 && (
               <>
                 <Row className="mt-4 pt-4 border-top">
@@ -513,7 +489,6 @@ function App() {
           </Card.Body>
         </Card>
 
-        {/* Loading State */}
         {loading && (
           <Card className="shadow-lg border-0 mb-4">
             <Card.Body className="text-center py-5">
@@ -523,7 +498,6 @@ function App() {
           </Card>
         )}
 
-        {/* Next Day Prediction */}
         {predictions.length > 0 && endDate && (
           <NextDayPrediction
             predictions={predictions}
@@ -532,10 +506,8 @@ function App() {
           />
         )}
 
-        {/* Results Section */}
         {predictions.length > 0 && (
           <>
-            {/* Chart Card */}
             <Card className="shadow-lg border-0 mb-4">
               <Card.Header className="bg-white border-0 py-4">
                 <div className="d-flex justify-content-between align-items-center">
@@ -566,10 +538,8 @@ function App() {
           </>
         )}
 
-        {/* Statistics Cards */}
         {predictions.length > 0 && (
           <>
-            {/* Energy and Irradiation Statistics */}
             <Row className="mb-4">
               <Col>
                 <h6 className="text-muted mb-3 d-flex align-items-center">
@@ -640,7 +610,6 @@ function App() {
               </Col>
             </Row>
 
-            {/* Additional Statistics Row */}
             <Row className="g-3 mb-4">
               <Col md={4}>
                 <Card className="border-0 shadow-sm bg-light">
@@ -700,7 +669,6 @@ function App() {
           </>
         )}
 
-        {/* Data Table Card */}
         <Card className="shadow-lg border-0">
           <Card.Header className="bg-white border-0 py-4">
             <h4 className="mb-0 text-primary d-flex align-items-center">
@@ -788,7 +756,6 @@ function App() {
               </Table>
             </div>
 
-            {/* Informação sobre registros exibidos */}
             {filteredPredictions.length > 0 && (
               <div className="d-flex justify-content-center align-items-center p-4 border-top bg-light">
                 <div className="text-muted d-flex align-items-center">
@@ -800,7 +767,6 @@ function App() {
           </Card.Body>
         </Card>
 
-        {/* Empty State */}
         {!loading && predictions.length === 0 && testDates.length === 0 && (
           <Card className="shadow-lg border-0 text-center">
             <Card.Body className="py-5">

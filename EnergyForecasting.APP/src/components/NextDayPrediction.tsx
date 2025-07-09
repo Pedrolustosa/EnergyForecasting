@@ -13,11 +13,9 @@ const NextDayPrediction: React.FC<NextDayPredictionProps> = ({
   endDate,
   model
 }) => {
-  // Calcular a previsão para o próximo dia
   const getNextDayPrediction = () => {
     if (predictions.length === 0 || !endDate) return null;
 
-    // Filtrar previsões até a data final escolhida
     const filteredPredictions = predictions.filter(p => {
       const predDate = new Date(p.date);
       const filterDate = new Date(endDate);
@@ -28,15 +26,10 @@ const NextDayPrediction: React.FC<NextDayPredictionProps> = ({
 
     const lastPrediction = filteredPredictions[filteredPredictions.length - 1];
     
-    // Calcular próximo dia após a data final escolhida (sempre endDate + 1)
     const nextDate = new Date(endDate);
     nextDate.setDate(nextDate.getDate() + 1);
     const nextDateString = nextDate.toISOString().split('T')[0];
     
-    console.log('=== DEBUG BUSCA VALOR EXISTENTE ===');
-    console.log('Procurando valor previsto para:', nextDateString);
-    
-    // Buscar o valor previsto que já existe para o próximo dia
     const nextDayPrediction = predictions.find(p => {
       const predDate = new Date(p.date).toISOString().split('T')[0];
       return predDate === nextDateString;
@@ -46,27 +39,16 @@ const NextDayPrediction: React.FC<NextDayPredictionProps> = ({
     
     if (nextDayPrediction) {
       predictedValue = nextDayPrediction.predicted;
-      console.log('Valor encontrado nos dados:', predictedValue);
     } else {
-      // Se não encontrar, usar o último valor como fallback
       predictedValue = lastPrediction.predicted;
-      console.log('Valor não encontrado, usando último valor:', predictedValue);
     }
     
-    console.log('===================================');
-
     const result = {
       date: nextDate.toISOString().split('T')[0],
       predicted: predictedValue,
       baseDate: lastPrediction.date,
       baseValue: lastPrediction.predicted
     };
-    
-    console.log('=== RESULTADO FINAL ===');
-    console.log('endDate (filtro):', endDate);
-    console.log('result.date (previsão):', result.date);
-    console.log('result.baseDate (último registro):', result.baseDate);
-    console.log('========================');
     
     return result;
   };
@@ -78,9 +60,8 @@ const NextDayPrediction: React.FC<NextDayPredictionProps> = ({
   }
 
   const formatDate = (dateString: string) => {
-    // Evitar problemas de timezone criando a data com partes separadas
     const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month - 1 porque Date usa 0-11 para meses
+    const date = new Date(year, month - 1, day); 
     
     const formatted = date.toLocaleDateString('pt-BR', {
       weekday: 'long',
@@ -89,17 +70,10 @@ const NextDayPrediction: React.FC<NextDayPredictionProps> = ({
       day: 'numeric'
     });
     
-    console.log('=== FORMATANDO DATA ===');
-    console.log('dateString recebido:', dateString);
-    console.log('data criada:', date);
-    console.log('data formatada:', formatted);
-    console.log('=======================');
-    
     return formatted;
   };
 
   const formatEndDate = (dateString: string) => {
-    // Evitar problemas de timezone para a data final
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     
