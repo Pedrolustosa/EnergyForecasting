@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Container, Button, Form, Spinner, Row, Col, Table, Card, Badge, Pagination } from "react-bootstrap";
+import { Container, Button, Form, Spinner, Row, Col, Table, Card, Badge } from "react-bootstrap";
 import { Chart as ChartJS } from "react-chartjs-2";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { Chart, registerables } from "chart.js";
 import { Prediction } from "./types";
+import NextDayPrediction from "./components/NextDayPrediction";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./App.css";
 
@@ -48,13 +49,8 @@ function App() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [testDates, setTestDates] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
-  const [recordsToShow, setRecordsToShow] = useState<number>(10);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [endDate, setEndDate] = useState<string>("");
 
-  // Resetar página quando filtros mudarem
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [startDate, recordsToShow]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) setFile(e.target.files[0]);
@@ -62,7 +58,7 @@ function App() {
 
   const handleUpload = async () => {
     if (!file) {
-      toastr.error("📁 Por favor, selecione um arquivo CSV antes de continuar.", "Arquivo Necessário");
+      toastr.error(" Por favor, selecione um arquivo CSV antes de continuar.", "Arquivo Necessário");
       return;
     }
     setLoading(true);
@@ -74,13 +70,13 @@ function App() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toastr.success(
-        `✅ Arquivo processado com sucesso! ${resp.data.test_dates?.length || 0} registros carregados.`,
+        ` Arquivo processado com sucesso! ${resp.data.test_dates?.length || 0} registros carregados.`,
         "Upload Concluído"
       );
       setTestDates(resp.data.test_dates || []);
     } catch (err: any) {
       toastr.error(
-        "❌ Falha ao processar o arquivo. Verifique se é um CSV válido.",
+        " Falha ao processar o arquivo. Verifique se é um CSV válido.",
         "Erro no Upload"
       );
     }
@@ -94,22 +90,22 @@ function App() {
       const resp = await axios.get<Prediction[]>(`${API_BASE}/predict/${model}`);
       setPredictions(resp.data);
       toastr.success(
-        `🔮 Previsão gerada com sucesso! ${resp.data.length} pontos de dados analisados usando o modelo ${model.toUpperCase()}.`,
+        ` Previsão gerada com sucesso! ${resp.data.length} pontos de dados analisados usando o modelo ${model.toUpperCase()}.`,
         "Análise Concluída"
       );
     } catch (err: any) {
       toastr.error(
-        "❌ Falha ao gerar previsão. Verifique se os dados foram carregados corretamente.",
+        " Falha ao gerar previsão. Verifique se os dados foram carregados corretamente.",
         "Erro na Previsão"
       );
     }
     setLoading(false);
   };
 
-  // Filtrar dados baseado na data inicial e implementar paginação
+  // Filtrar dados baseado no intervalo de datas
   const getFilteredPredictions = () => {
     let filtered = [...predictions];
-    
+
     // Filtrar por data inicial se especificada
     if (startDate) {
       const startDateObj = new Date(startDate);
@@ -118,20 +114,20 @@ function App() {
         return predDate >= startDateObj;
       });
     }
-    
+
+    // Filtrar por data final se especificada
+    if (endDate) {
+      const endDateObj = new Date(endDate);
+      filtered = filtered.filter(p => {
+        const predDate = new Date(p.date);
+        return predDate <= endDateObj;
+      });
+    }
+
     return filtered;
   };
 
-  // Implementar paginação
-  const getPaginatedData = () => {
-    const filtered = getFilteredPredictions();
-    const startIndex = (currentPage - 1) * recordsToShow;
-    const endIndex = startIndex + recordsToShow;
-    return filtered.slice(startIndex, endIndex);
-  };
 
-  // Calcular total de páginas
-  const totalPages = Math.ceil(getFilteredPredictions().length / recordsToShow);
 
   // Gerar dados simulados para demonstração (irradiação e energia injetada)
   const generateSimulatedData = (predictions: Prediction[]) => {
@@ -147,10 +143,9 @@ function App() {
   // Dados para o gráfico (todos os dados filtrados)
   const filteredPredictions = getFilteredPredictions();
   const enrichedPredictionsChart = generateSimulatedData(filteredPredictions);
-  
-  // Dados para a tabela (paginados)
-  const paginatedPredictions = getPaginatedData();
-  const enrichedPredictionsTable = generateSimulatedData(paginatedPredictions);
+
+  // Dados para a tabela (todos os dados filtrados)
+  const enrichedPredictionsTable = generateSimulatedData(filteredPredictions);
 
   // Configuração do gráfico misto
   const mixedChartData = {
@@ -189,7 +184,7 @@ function App() {
       // Linha - Irradiação
       {
         type: 'line' as const,
-        label: "Irradiação (W/m²)",
+        label: "Irradiação (Wh/m2)",
         data: enrichedPredictionsChart.map((p) => p.irradiation || 0),
         borderColor: "#dc3545",
         backgroundColor: "rgba(220, 53, 69, 0.1)",
@@ -225,13 +220,13 @@ function App() {
       },
       tooltip: {
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
             }
             if (context.dataset.yAxisID === 'y1') {
-              label += context.parsed.y + ' W/m²';
+              label += context.parsed.y + ' Wh/m2';
             } else {
               label += context.parsed.y.toFixed(2) + ' kWh';
             }
@@ -266,7 +261,7 @@ function App() {
         position: 'right' as const,
         title: {
           display: true,
-          text: 'Irradiação (W/m²)'
+          text: 'Irradiação (Wh/m2)'
         },
         grid: {
           drawOnChartArea: false,
@@ -321,7 +316,7 @@ function App() {
                     Objetivo da Pesquisa
                   </h2>
                   <p className="text-muted mb-0 small">
-                    Este sistema implementa algoritmos de Machine Learning para previsão de geração de energia renovável, 
+                    Este sistema implementa algoritmos de Machine Learning para previsão de geração de energia renovável,
                     utilizando modelos ARIMA, LSTM e Random Forest para análise preditiva de séries temporais energéticas.
                   </p>
                 </div>
@@ -358,9 +353,9 @@ function App() {
                     <i className="bi bi-file-earmark-spreadsheet me-2 text-primary"></i>
                     Arquivo de Dados
                   </Form.Label>
-                  <Form.Control 
-                    type="file" 
-                    accept=".csv" 
+                  <Form.Control
+                    type="file"
+                    accept=".csv"
                     onChange={handleFileChange}
                     className="form-control-lg"
                     style={{ border: '2px dashed #dee2e6' }}
@@ -376,8 +371,8 @@ function App() {
                     <i className="bi bi-cpu me-2 text-success"></i>
                     Modelo de Previsão
                   </Form.Label>
-                  <Form.Select 
-                    value={model} 
+                  <Form.Select
+                    value={model}
                     onChange={e => setModel(e.target.value as Model)}
                     className="form-select-lg"
                   >
@@ -392,10 +387,10 @@ function App() {
               </Col>
               <Col md={4} className="d-flex flex-column justify-content-end">
                 <div className="d-grid gap-2">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     size="lg"
-                    onClick={handleUpload} 
+                    onClick={handleUpload}
                     disabled={loading || !file}
                     className="fw-semibold"
                   >
@@ -411,10 +406,10 @@ function App() {
                       </>
                     )}
                   </Button>
-                  <Button 
-                    variant="success" 
+                  <Button
+                    variant="success"
                     size="lg"
-                    onClick={handlePredict} 
+                    onClick={handlePredict}
                     disabled={loading || !file || testDates.length === 0}
                     className="fw-semibold"
                   >
@@ -433,7 +428,7 @@ function App() {
                 </div>
               </Col>
             </Row>
-            
+
             {/* Status Indicators */}
             <Row className="mt-4">
               <Col>
@@ -467,45 +462,39 @@ function App() {
                 </Row>
                 <Row className="g-3">
                   <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
-                      <i className="bi bi-calendar-date me-2 text-info"></i>
-                      Data Inicial
-                    </Form.Label>
-                    <Form.Control 
-                      type="date" 
-                      value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
-                      className="form-control"
-                    />
-                    <Form.Text className="text-muted">
-                      Filtrar dados a partir desta data
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
-                      <i className="bi bi-list-ol me-2 text-warning"></i>
-                      Registros por Página
-                    </Form.Label>
-                    <Form.Select 
-                      value={recordsToShow}
-                      onChange={e => setRecordsToShow(Number(e.target.value))}
-                      className="form-select"
-                    >
-                      <option value={5}>5 registros</option>
-                      <option value={10}>10 registros</option>
-                      <option value={15}>15 registros</option>
-                      <option value={20}>20 registros</option>
-                      <option value={30}>30 registros</option>
-                      <option value={50}>50 registros</option>
-                    </Form.Select>
-                    <Form.Text className="text-muted">
-                      Quantidade de registros na tabela por página
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
+                        <i className="bi bi-calendar-date me-2 text-info"></i>
+                        Data Inicial
+                      </Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
+                        className="form-control"
+                      />
+                      <Form.Text className="text-muted">
+                        Filtrar dados a partir desta data
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
+                        <i className="bi bi-calendar-check me-2 text-success"></i>
+                        Data Final
+                      </Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={endDate}
+                        onChange={e => setEndDate(e.target.value)}
+                        className="form-control"
+                      />
+                      <Form.Text className="text-muted">
+                        Filtrar dados até esta data
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
                 </Row>
               </>
             )}
@@ -520,6 +509,15 @@ function App() {
               <span className="fs-5 text-muted">Processando dados...</span>
             </Card.Body>
           </Card>
+        )}
+
+        {/* Next Day Prediction */}
+        {predictions.length > 0 && endDate && (
+          <NextDayPrediction
+            predictions={predictions}
+            endDate={endDate}
+            model={model}
+          />
         )}
 
         {/* Results Section */}
@@ -553,142 +551,242 @@ function App() {
                 </div>
               </Card.Body>
             </Card>
-
-            {/* Data Table Card */}
-            <Card className="shadow-lg border-0">
-              <Card.Header className="bg-white border-0 py-4">
-                <h4 className="mb-0 text-primary d-flex align-items-center">
-                  <i className="bi bi-table me-2"></i>
-                  Dados Detalhados
-                </h4>
-              </Card.Header>
-              <Card.Body className="p-0">
-                <div className="table-responsive">
-                  <Table className="mb-0" hover>
-                    <thead className="table-light">
-                      <tr>
-                        <th className="py-3 px-4 fw-bold">
-                          <i className="bi bi-calendar3 me-2"></i>Data
-                        </th>
-                        <th className="py-3 px-4 fw-bold text-primary">
-                          <i className="bi bi-lightning-charge me-2"></i>Energia Gerada
-                        </th>
-                        <th className="py-3 px-4 fw-bold text-success">
-                          <i className="bi bi-magic me-2"></i>Energia Prevista
-                        </th>
-                        <th className="py-3 px-4 fw-bold text-warning">
-                          <i className="bi bi-arrow-up-circle me-2"></i>Energia Injetada
-                        </th>
-                        <th className="py-3 px-4 fw-bold text-danger">
-                          <i className="bi bi-sun me-2"></i>Irradiação
-                        </th>
-                        <th className="py-3 px-4 fw-bold text-info">
-                          <i className="bi bi-bar-chart me-2"></i>Diferença
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {enrichedPredictionsTable.map((p, idx) => {
-                        const difference = p.real !== null ? Math.abs(p.real - p.predicted) : null;
-                        const percentDiff = p.real !== null && p.real !== 0 ? ((difference! / p.real) * 100) : null;
-                        
-                        return (
-                          <tr key={idx} className={idx % 2 === 0 ? 'table-light' : ''}>
-                            <td className="py-3 px-4 fw-semibold">{p.date}</td>
-                            <td className="py-3 px-4">
-                              {p.real !== null ? (
-                                <span className="text-primary fw-semibold">
-                                  {p.real.toFixed(2)} kWh
-                                </span>
-                              ) : (
-                                <span className="text-muted fst-italic">Não disponível</span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-success fw-semibold">
-                                {p.predicted.toFixed(2)} kWh
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-warning fw-semibold">
-                                {p.injected?.toFixed(2) || '0.00'} kWh
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-danger fw-semibold">
-                                {p.irradiation?.toFixed(0) || '0'} W/m²
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              {difference !== null ? (
-                                <div>
-                                  <span className="text-info fw-semibold">
-                                    ±{difference.toFixed(2)} kWh
-                                  </span>
-                                  {percentDiff !== null && (
-                                    <small className="d-block text-muted">
-                                      ({percentDiff.toFixed(1)}%)
-                                    </small>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-muted fst-italic">-</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                </div>
-                
-                {/* Paginação */}
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-between align-items-center p-4 border-top">
-                    <div className="text-muted">
-                      Mostrando {((currentPage - 1) * recordsToShow) + 1} a {Math.min(currentPage * recordsToShow, filteredPredictions.length)} de {filteredPredictions.length} registros
-                    </div>
-                    <Pagination className="mb-0">
-                      <Pagination.First 
-                        onClick={() => setCurrentPage(1)} 
-                        disabled={currentPage === 1}
-                      />
-                      <Pagination.Prev 
-                        onClick={() => setCurrentPage(currentPage - 1)} 
-                        disabled={currentPage === 1}
-                      />
-                      
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                        if (pageNum <= totalPages) {
-                          return (
-                            <Pagination.Item
-                              key={pageNum}
-                              active={pageNum === currentPage}
-                              onClick={() => setCurrentPage(pageNum)}
-                            >
-                              {pageNum}
-                            </Pagination.Item>
-                          );
-                        }
-                        return null;
-                      })}
-                      
-                      <Pagination.Next 
-                        onClick={() => setCurrentPage(currentPage + 1)} 
-                        disabled={currentPage === totalPages}
-                      />
-                      <Pagination.Last 
-                        onClick={() => setCurrentPage(totalPages)} 
-                        disabled={currentPage === totalPages}
-                      />
-                    </Pagination>
-                  </div>
-                )}
-              </Card.Body>
-            </Card>
           </>
         )}
+
+        {/* Statistics Cards */}
+        {predictions.length > 0 && (
+          <>
+            {/* Energy and Irradiation Statistics */}
+            <Row className="mb-4">
+              <Col>
+                <h6 className="text-muted mb-3 d-flex align-items-center">
+                  <i className="bi bi-bar-chart me-2"></i>
+                  Estatísticas do Período Selecionado
+                </h6>
+              </Col>
+            </Row>
+            <Row className="g-3 mb-4">
+              <Col md={3}>
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="text-center p-4">
+                    <div className="mb-3">
+                      <i className="bi bi-lightning-charge-fill text-primary" style={{ fontSize: '2.5rem' }}></i>
+                    </div>
+                    <h3 className="text-primary mb-1">
+                      {filteredPredictions.reduce((sum, p) => sum + (p.real || 0), 0).toFixed(2)}
+                    </h3>
+                    <p className="text-muted mb-0 small fw-semibold">kWh</p>
+                    <p className="text-muted mb-0 small">Energia Gerada Total</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="text-center p-4">
+                    <div className="mb-3">
+                      <i className="bi bi-magic text-success" style={{ fontSize: '2.5rem' }}></i>
+                    </div>
+                    <h3 className="text-success mb-1">
+                      {filteredPredictions.reduce((sum, p) => sum + p.predicted, 0).toFixed(2)}
+                    </h3>
+                    <p className="text-muted mb-0 small fw-semibold">kWh</p>
+                    <p className="text-muted mb-0 small">Energia Prevista Total</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="text-center p-4">
+                    <div className="mb-3">
+                      <i className="bi bi-arrow-up-circle text-warning" style={{ fontSize: '2.5rem' }}></i>
+                    </div>
+                    <h3 className="text-warning mb-1">
+                      {enrichedPredictionsChart.reduce((sum, p) => sum + (p.injected || 0), 0).toFixed(2)}
+                    </h3>
+                    <p className="text-muted mb-0 small fw-semibold">kWh</p>
+                    <p className="text-muted mb-0 small">Energia Injetada Total</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="text-center p-4">
+                    <div className="mb-3">
+                      <i className="bi bi-sun text-danger" style={{ fontSize: '2.5rem' }}></i>
+                    </div>
+                    <h3 className="text-danger mb-1">
+                      {enrichedPredictionsChart.length > 0 ?
+                        (enrichedPredictionsChart.reduce((sum, p) => sum + (p.irradiation || 0), 0) / enrichedPredictionsChart.length).toFixed(0) :
+                        '0'
+                      }
+                    </h3>
+                    <p className="text-muted mb-0 small fw-semibold">Wh/m2</p>
+                    <p className="text-muted mb-0 small">Irradiação Média</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Additional Statistics Row */}
+            <Row className="g-3 mb-4">
+              <Col md={4}>
+                <Card className="border-0 shadow-sm bg-light">
+                  <Card.Body className="text-center p-3">
+                    <div className="d-flex align-items-center justify-content-center">
+                      <i className="bi bi-calendar-range text-info me-2" style={{ fontSize: '1.5rem' }}></i>
+                      <div>
+                        <h6 className="mb-0 text-info">{filteredPredictions.length}</h6>
+                        <small className="text-muted">Registros no Período</small>
+                      </div>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={4}>
+                <Card className="border-0 shadow-sm bg-light">
+                  <Card.Body className="text-center p-3">
+                    <div className="d-flex align-items-center justify-content-center">
+                      <i className="bi bi-percent text-info me-2" style={{ fontSize: '1.5rem' }}></i>
+                      <div>
+                        <h6 className="mb-0 text-info">
+                          {filteredPredictions.length > 0 ?
+                            ((filteredPredictions.length / predictions.length) * 100).toFixed(1) :
+                            '0'
+                          }%
+                        </h6>
+                        <small className="text-muted">do Total de Dados</small>
+                      </div>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={4}>
+                <Card className="border-0 shadow-sm bg-light">
+                  <Card.Body className="text-center p-3">
+                    <div className="d-flex align-items-center justify-content-center">
+                      <i className="bi bi-graph-up-arrow text-info me-2" style={{ fontSize: '1.5rem' }}></i>
+                      <div>
+                        <h6 className="mb-0 text-info">
+                          {filteredPredictions.length > 0 && filteredPredictions.some(p => p.real !== null) ?
+                            (
+                              Math.abs(
+                                filteredPredictions.reduce((sum, p) => sum + (p.real || 0), 0) -
+                                filteredPredictions.reduce((sum, p) => sum + p.predicted, 0)
+                              ) / filteredPredictions.reduce((sum, p) => sum + (p.real || 0), 0) * 100
+                            ).toFixed(1) :
+                            '0'
+                          }%
+                        </h6>
+                        <small className="text-muted">Diferença Média</small>
+                      </div>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </>
+        )}
+
+        {/* Data Table Card */}
+        <Card className="shadow-lg border-0">
+          <Card.Header className="bg-white border-0 py-4">
+            <h4 className="mb-0 text-primary d-flex align-items-center">
+              <i className="bi bi-table me-2"></i>
+              Dados Detalhados
+            </h4>
+          </Card.Header>
+          <Card.Body className="p-0">
+            <div className="table-responsive">
+              <Table className="mb-0" hover>
+                <thead className="table-light">
+                  <tr>
+                    <th className="py-3 px-4 fw-bold">
+                      <i className="bi bi-calendar3 me-2"></i>Data
+                    </th>
+                    <th className="py-3 px-4 fw-bold text-primary">
+                      <i className="bi bi-lightning-charge me-2"></i>Energia Gerada
+                    </th>
+                    <th className="py-3 px-4 fw-bold text-success">
+                      <i className="bi bi-magic me-2"></i>Energia Prevista
+                    </th>
+                    <th className="py-3 px-4 fw-bold text-warning">
+                      <i className="bi bi-arrow-up-circle me-2"></i>Energia Injetada
+                    </th>
+                    <th className="py-3 px-4 fw-bold text-danger">
+                      <i className="bi bi-sun me-2"></i>Irradiação
+                    </th>
+                    <th className="py-3 px-4 fw-bold text-info">
+                      <i className="bi bi-bar-chart me-2"></i>Diferença
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enrichedPredictionsTable.map((p, idx) => {
+                    const difference = p.real !== null ? Math.abs(p.real - p.predicted) : null;
+                    const percentDiff = p.real !== null && p.real !== 0 ? ((difference! / p.real) * 100) : null;
+
+                    return (
+                      <tr key={idx} className={idx % 2 === 0 ? 'table-light' : ''}>
+                        <td className="py-3 px-4 fw-semibold">{p.date}</td>
+                        <td className="py-3 px-4">
+                          {p.real !== null ? (
+                            <span className="text-primary fw-semibold">
+                              {p.real.toFixed(2)} kWh
+                            </span>
+                          ) : (
+                            <span className="text-muted fst-italic">Não disponível</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-success fw-semibold">
+                            {p.predicted.toFixed(2)} kWh
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-warning fw-semibold">
+                            {p.injected?.toFixed(2) || '0.00'} kWh
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-danger fw-semibold">
+                            {p.irradiation?.toFixed(0) || '0'} Wh/m2
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          {difference !== null ? (
+                            <div>
+                              <span className="text-info fw-semibold">
+                                ±{difference.toFixed(2)} kWh
+                              </span>
+                              {percentDiff !== null && (
+                                <small className="d-block text-muted">
+                                  ({percentDiff.toFixed(1)}%)
+                                </small>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted fst-italic">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </div>
+
+            {/* Informação sobre registros exibidos */}
+            {filteredPredictions.length > 0 && (
+              <div className="d-flex justify-content-center align-items-center p-4 border-top bg-light">
+                <div className="text-muted d-flex align-items-center">
+                  <i className="bi bi-info-circle me-2"></i>
+                  Exibindo todos os {filteredPredictions.length} registros do período selecionado
+                </div>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
 
         {/* Empty State */}
         {!loading && predictions.length === 0 && testDates.length === 0 && (
