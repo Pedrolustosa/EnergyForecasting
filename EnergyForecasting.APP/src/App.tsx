@@ -669,7 +669,7 @@ function App() {
           </>
         )}
 
-        <Card className="shadow-lg border-0">
+        <Card className="shadow-lg border-0 mb-4">
           <Card.Header className="bg-white border-0 py-4">
             <h4 className="mb-0 text-primary d-flex align-items-center">
               <i className="bi bi-table me-2"></i>
@@ -768,7 +768,7 @@ function App() {
         </Card>
 
         {!loading && predictions.length === 0 && testDates.length === 0 && (
-          <Card className="shadow-lg border-0 text-center">
+          <Card className="shadow-lg border-0 text-center mb-4">
             <Card.Body className="py-5">
               <div className="mb-4">
                 <i className="bi bi-graph-up" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
