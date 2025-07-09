@@ -102,6 +102,16 @@ function App() {
     setLoading(false);
   };
 
+  // Formatar data para o padrão brasileiro
+  const formatDateToBR = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   // Filtrar dados baseado no intervalo de datas
   const getFilteredPredictions = () => {
     let filtered = [...predictions];
@@ -118,9 +128,11 @@ function App() {
     // Filtrar por data final se especificada
     if (endDate) {
       const endDateObj = new Date(endDate);
+      // Adicionar 1 dia para incluir toda a data final (até 23:59:59)
+      endDateObj.setDate(endDateObj.getDate() + 1);
       filtered = filtered.filter(p => {
         const predDate = new Date(p.date);
-        return predDate <= endDateObj;
+        return predDate < endDateObj;
       });
     }
 
@@ -149,7 +161,7 @@ function App() {
 
   // Configuração do gráfico misto
   const mixedChartData = {
-    labels: enrichedPredictionsChart.map((p) => p.date),
+    labels: enrichedPredictionsChart.map((p) => formatDateToBR(p.date)),
     datasets: [
       // Barras - Energia Prevista
       {
@@ -728,7 +740,7 @@ function App() {
 
                     return (
                       <tr key={idx} className={idx % 2 === 0 ? 'table-light' : ''}>
-                        <td className="py-3 px-4 fw-semibold">{p.date}</td>
+                        <td className="py-3 px-4 fw-semibold">{formatDateToBR(p.date)}</td>
                         <td className="py-3 px-4">
                           {p.real !== null ? (
                             <span className="text-primary fw-semibold">
