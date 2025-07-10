@@ -18,7 +18,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", 
                    "https://poli-previsao-energia-solar.vercel.app", 
-                   "http://poli-previsao-energia-solar.vercel.app"], # Ou ["*"] para liberar tudo
+                   "http://poli-previsao-energia-solar.vercel.app",
+                   "https://energy-forecasting-app.vercel.app",
+                   "http://energy-forecasting-app.vercel.app"], # Ou ["*"] para liberar tudo
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

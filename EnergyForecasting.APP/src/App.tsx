@@ -63,17 +63,22 @@ function App() {
     setLoading(true);
     setPredictions([]);
     try {
+      console.log('📁 Fazendo upload do arquivo:', file.name);
       const formData = new FormData();
       formData.append("file", file);
       const resp = await axios.post(`${API_BASE}/upload_csv`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log('✅ Resposta do upload:', resp.data);
+      console.log('📅 Datas de teste carregadas:', resp.data.test_dates?.length || 0);
+      
       toastr.success(
         ` Arquivo processado com sucesso! ${resp.data.test_dates?.length || 0} registros carregados.`,
         "Upload Concluído"
       );
       setTestDates(resp.data.test_dates || []);
     } catch (err: any) {
+      console.error('❌ Erro no upload:', err);
       toastr.error(
         " Falha ao processar o arquivo. Verifique se é um CSV válido.",
         "Erro no Upload"
@@ -86,13 +91,19 @@ function App() {
     setLoading(true);
     setPredictions([]);
     try {
+      console.log(`🔍 Fazendo requisição para: ${API_BASE}/predict/${model}`);
       const resp = await axios.get<Prediction[]>(`${API_BASE}/predict/${model}`);
+      console.log('📊 Dados recebidos da API:', resp.data);
+      console.log('📈 Primeiro item:', resp.data[0]);
+      console.log('📉 Último item:', resp.data[resp.data.length - 1]);
+      
       setPredictions(resp.data);
       toastr.success(
         ` Previsão gerada com sucesso! ${resp.data.length} pontos de dados analisados usando o modelo ${model.toUpperCase()}.`,
         "Análise Concluída"
       );
     } catch (err: any) {
+      console.error('❌ Erro na previsão:', err);
       toastr.error(
         " Falha ao gerar previsão. Verifique se os dados foram carregados corretamente.",
         "Erro na Previsão"
@@ -307,8 +318,8 @@ function App() {
                     Objetivo da Pesquisa
                   </h2>
                   <p className="text-muted mb-0 small">
-                    Este sistema implementa algoritmos de Machine Learning para previsão de geração de energia renovável,
-                    utilizando modelos ARIMA, LSTM e Random Forest para análise preditiva de séries temporais energéticas.
+                    Sistema de previsão diária da energia elétrica gerada por usina fotovoltaica em Paulistana-PI,
+                    utilizando modelos ARIMA, ARIMAX, SVR e MLP com dados reais.
                   </p>
                 </div>
                 <div className="col-md-4 text-end">
@@ -336,8 +347,9 @@ function App() {
             </h4>
           </Card.Header>
           <Card.Body className="p-4">
-            <Row className="g-4">
-              <Col md={4}>
+            {/* Primeira linha: Upload e Seleção de Modelo */}
+            <Row className="g-4 mb-4">
+              <Col lg={6}>
                 <Form.Group>
                   <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
                     <i className="bi bi-file-earmark-spreadsheet me-2 text-primary"></i>
@@ -355,7 +367,7 @@ function App() {
                   </Form.Text>
                 </Form.Group>
               </Col>
-              <Col md={4}>
+              <Col lg={6}>
                 <Form.Group>
                   <Form.Label className="fw-semibold text-dark mb-2 d-flex align-items-center">
                     <i className="bi bi-cpu me-2 text-success"></i>
@@ -375,14 +387,18 @@ function App() {
                   </Form.Text>
                 </Form.Group>
               </Col>
-              <Col md={4} className="d-flex flex-column justify-content-end">
-                <div className="d-grid gap-2">
+            </Row>
+
+            {/* Segunda linha: Botões de Ação */}
+            <Row className="g-3">
+              <Col md={6}>
+                <div className="d-grid">
                   <Button
                     variant="primary"
                     size="lg"
                     onClick={handleUpload}
                     disabled={loading || !file}
-                    className="fw-semibold"
+                    className="fw-semibold py-3"
                   >
                     {loading ? (
                       <>
@@ -396,12 +412,16 @@ function App() {
                       </>
                     )}
                   </Button>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="d-grid">
                   <Button
                     variant="success"
                     size="lg"
                     onClick={handlePredict}
                     disabled={loading || !file || testDates.length === 0}
-                    className="fw-semibold"
+                    className="fw-semibold py-3"
                   >
                     {loading ? (
                       <>
@@ -669,35 +689,75 @@ function App() {
           </>
         )}
 
-        <Card className="shadow-lg border-0 mb-4">
+        {predictions.length > 0 && (
+          <Card className="shadow-lg border-0 mb-4">
           <Card.Header className="bg-white border-0 py-4">
-            <h4 className="mb-0 text-primary d-flex align-items-center">
-              <i className="bi bi-table me-2"></i>
-              Dados Detalhados
-            </h4>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+              <div>
+                <h4 className="mb-1 text-primary d-flex align-items-center">
+                  <i className="bi bi-table me-2"></i>
+                  Dados Detalhados
+                </h4>
+                <p className="text-muted mb-0 small">
+                  Visualização completa dos dados de energia e previsões
+                </p>
+              </div>
+              <div className="d-flex gap-2 flex-wrap">
+                <Badge bg="primary" className="px-3 py-2">
+                  <i className="bi bi-list-ol me-1"></i>
+                  {enrichedPredictionsTable.length} registros
+                </Badge>
+                <Badge bg="success" className="px-3 py-2">
+                  <i className="bi bi-check-circle me-1"></i>
+                  Dados processados
+                </Badge>
+              </div>
+            </div>
           </Card.Header>
+          
           <Card.Body className="p-0">
+            {/* Tabela Responsiva */}
             <div className="table-responsive">
-              <Table className="mb-0" hover>
-                <thead className="table-light">
+              <Table className="mb-0" hover striped>
+                <thead className="table-dark">
                   <tr>
-                    <th className="py-3 px-4 fw-bold">
-                      <i className="bi bi-calendar3 me-2"></i>Data
+                    <th className="py-3 px-4 fw-bold border-0">
+                      <i className="bi bi-calendar3 me-2"></i>
+                      <span className="d-none d-md-inline">Data</span>
                     </th>
-                    <th className="py-3 px-4 fw-bold text-primary">
-                      <i className="bi bi-lightning-charge me-2"></i>Energia Gerada
+                    <th className="py-3 px-4 fw-bold border-0 text-center">
+                      <i className="bi bi-lightning-charge me-2 text-warning"></i>
+                      <span className="d-none d-lg-inline">Energia</span>
+                      <span className="d-lg-none">Real</span>
+                      <br />
+                      <small className="opacity-75">kWh</small>
                     </th>
-                    <th className="py-3 px-4 fw-bold text-success">
-                      <i className="bi bi-magic me-2"></i>Energia Prevista
+                    <th className="py-3 px-4 fw-bold border-0 text-center">
+                      <i className="bi bi-magic me-2 text-success"></i>
+                      <span className="d-none d-lg-inline">Previsão</span>
+                      <span className="d-lg-none">Prev</span>
+                      <br />
+                      <small className="opacity-75">kWh</small>
                     </th>
-                    <th className="py-3 px-4 fw-bold text-warning">
-                      <i className="bi bi-arrow-up-circle me-2"></i>Energia Injetada
+                    <th className="py-3 px-4 fw-bold border-0 text-center d-none d-md-table-cell">
+                      <i className="bi bi-arrow-up-circle me-2 text-info"></i>
+                      <span className="d-none d-lg-inline">Injetada</span>
+                      <span className="d-lg-none">Inj</span>
+                      <br />
+                      <small className="opacity-75">kWh</small>
                     </th>
-                    <th className="py-3 px-4 fw-bold text-danger">
-                      <i className="bi bi-sun me-2"></i>Irradiação
+                    <th className="py-3 px-4 fw-bold border-0 text-center d-none d-lg-table-cell">
+                      <i className="bi bi-sun me-2 text-danger"></i>
+                      Irradiação
+                      <br />
+                      <small className="opacity-75">Wh/m²</small>
                     </th>
-                    <th className="py-3 px-4 fw-bold text-info">
-                      <i className="bi bi-bar-chart me-2"></i>Diferença
+                    <th className="py-3 px-4 fw-bold border-0 text-center">
+                      <i className="bi bi-bar-chart me-2 text-primary"></i>
+                      <span className="d-none d-md-inline">Diferença</span>
+                      <span className="d-md-none">Diff</span>
+                      <br />
+                      <small className="opacity-75">%</small>
                     </th>
                   </tr>
                 </thead>
@@ -708,41 +768,75 @@ function App() {
 
                     return (
                       <tr key={idx} className={idx % 2 === 0 ? 'table-light' : ''}>
-                        <td className="py-3 px-4 fw-semibold">{formatDateToBR(p.date)}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 fw-semibold text-dark">
+                          <div className="d-flex flex-column">
+                            <span>{formatDateToBR(p.date)}</span>
+                            <small className="text-muted d-md-none">
+                              {p.injected?.toFixed(1) || '0.0'} kWh inj.
+                            </small>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
                           {p.real !== null ? (
-                            <span className="text-primary fw-semibold">
-                              {p.real.toFixed(2)} kWh
-                            </span>
+                            <div>
+                              <span className="fw-bold text-primary fs-6">
+                                {p.real.toFixed(2)}
+                              </span>
+                              <div className="progress mt-1" style={{ height: '4px' }}>
+                                <div 
+                                  className="progress-bar bg-primary" 
+                                  style={{ width: `${Math.min((p.real / Math.max(...enrichedPredictionsTable.map(x => x.real || 0))) * 100, 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
                           ) : (
-                            <span className="text-muted fst-italic">Não disponível</span>
+                            <span className="text-muted fst-italic small">N/A</span>
                           )}
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="text-success fw-semibold">
-                            {p.predicted.toFixed(2)} kWh
+                        <td className="py-3 px-4 text-center">
+                          <div>
+                            <span className="fw-bold text-success fs-6">
+                              {p.predicted.toFixed(2)}
+                            </span>
+                            <div className="progress mt-1" style={{ height: '4px' }}>
+                              <div 
+                                className="progress-bar bg-success" 
+                                style={{ width: `${Math.min((p.predicted / Math.max(...enrichedPredictionsTable.map(x => x.predicted))) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center d-none d-md-table-cell">
+                          <span className="fw-semibold text-info">
+                            {p.injected?.toFixed(2) || '0.00'}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="text-warning fw-semibold">
-                            {p.injected?.toFixed(2) || '0.00'} kWh
-                          </span>
+                        <td className="py-3 px-4 text-center d-none d-lg-table-cell">
+                          <div className="d-flex align-items-center justify-content-center">
+                            <span className="fw-semibold text-danger me-2">
+                              {p.irradiation?.toFixed(0) || '0'}
+                            </span>
+                            {(p.irradiation || 0) > 800 && (
+                              <i className="bi bi-brightness-high-fill text-warning" title="Alta irradiação"></i>
+                            )}
+                          </div>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="text-danger fw-semibold">
-                            {p.irradiation?.toFixed(0) || '0'} Wh/m2
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          {difference !== null ? (
+                        <td className="py-3 px-4 text-center">
+                          {difference !== null && percentDiff !== null ? (
                             <div>
-                              <span className="text-info fw-semibold">
-                                ±{difference.toFixed(2)} kWh
+                              <span className={`fw-bold ${
+                                percentDiff < 5 ? 'text-success' : 
+                                percentDiff < 15 ? 'text-warning' : 'text-danger'
+                              }`}>
+                                {percentDiff.toFixed(1)}%
                               </span>
-                              {percentDiff !== null && (
-                                <small className="d-block text-muted">
-                                  ({percentDiff.toFixed(1)}%)
+                              <div className="d-none d-md-block">
+                                <small className="text-muted">
+                                  ±{difference.toFixed(2)} kWh
                                 </small>
+                              </div>
+                              {percentDiff < 5 && (
+                                <i className="bi bi-check-circle-fill text-success ms-1 d-none d-lg-inline" title="Previsão precisa"></i>
                               )}
                             </div>
                           ) : (
@@ -756,16 +850,20 @@ function App() {
               </Table>
             </div>
 
-            {filteredPredictions.length > 0 && (
-              <div className="d-flex justify-content-center align-items-center p-4 border-top bg-light">
-                <div className="text-muted d-flex align-items-center">
+            {/* Rodapé com Informações */}
+            <div className="bg-light border-top">
+              <div className="p-4">
+                <div className="d-flex align-items-center justify-content-center text-muted">
                   <i className="bi bi-info-circle me-2"></i>
-                  Exibindo todos os {filteredPredictions.length} registros do período selecionado
+                  <span className="me-3">
+                    Exibindo <strong>{enrichedPredictionsTable.length}</strong> registros
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
           </Card.Body>
         </Card>
+        )}
 
         {!loading && predictions.length === 0 && testDates.length === 0 && (
           <Card className="shadow-lg border-0 text-center mb-4">
