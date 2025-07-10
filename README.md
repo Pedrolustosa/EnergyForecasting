@@ -4,13 +4,13 @@
 <!-- Badges Section -->
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python&logoColor=white)
-![R](https://img.shields.io/badge/R-4.0+-276DC3?style=for-the-badge&logo=r&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python&logoColor=white)
+![R](https://img.shields.io/badge/R-3.5.0+-276DC3?style=for-the-badge&logo=r&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.68+-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![React](https://img.shields.io/badge/React-19+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.5+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-ARIMA%20|%20SVR%20|%20MLP-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-ARIMA%20|%20ARIMAX%20|%20SVR%20|%20MLP-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
 ![Solar Energy](https://img.shields.io/badge/Solar%20Energy-Forecasting-FFC107?style=for-the-badge&logo=solar-power&logoColor=black)
 ![Academic](https://img.shields.io/badge/Academic%20Project-UPE-4CAF50?style=for-the-badge&logo=graduation-cap&logoColor=white)
 
